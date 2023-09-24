@@ -1,0 +1,10 @@
+{
+  "login.labels.email": "Email",
+  "login.labels.password": "Password",
+  "login.title": "Login to GSO",
+  "login.errors.email.required": "The email is required",
+  "login.errors.email.format": "Invalid email",
+  "login.errors.password.required": "The password is required",
+  "login.errors.password.min": "The password must be at least 8 characters",
+  "login.submit": "Login"
+}
