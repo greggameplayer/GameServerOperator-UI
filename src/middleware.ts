@@ -1,4 +1,3 @@
-import { i18nRouter } from 'next-i18n-router';
 import i18nConfig from '../i18nConfig';
 import {NextRequest, NextResponse} from "next/server";
 import Negotiator from "negotiator";
@@ -16,8 +15,6 @@ export function middleware(request: NextRequest) {
         const languages = new Negotiator({headers: negotiatorHeaders}).languages();
 
         chosenLanguage = match(languages, i18nConfig.locales, i18nConfig.defaultLocale);
-        // set NEXT_LOCALE cookie using document.cookie
-        //document.cookie = `NEXT_LOCALE=${preferredLanguage}; path=/;`;
     }
     const response = NextResponse.rewrite(request.nextUrl);
     response.cookies.set('NEXT_LOCALE', chosenLanguage);

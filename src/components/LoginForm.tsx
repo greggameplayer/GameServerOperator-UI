@@ -4,9 +4,7 @@ import {useIntl} from "react-intl";
 import * as z from "zod";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {Card, CardBody, CardFooter, CardHeader} from "@nextui-org/card";
-import {Input} from "@nextui-org/input";
-import {Button} from "@nextui-org/button";
+import {Input, Card, CardBody, CardFooter, CardHeader, Button} from "@nextui-org/react";
 
 export const LoginForm = () => {
     const {formatMessage} = useIntl();
