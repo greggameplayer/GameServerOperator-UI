@@ -37,7 +37,8 @@ export const LanguageSwitcher = ({className} : {className?: string}) => {
     const [selectedOption, setSelectedOption] = useState(options.find((v) => v.value === currentLocale));
 
     return (
-        <Select isSearchable={false} onChange={handleOnChange} options={options} defaultValue={selectedOption} instanceId={useId()} className={className}/>
+        <Select isSearchable={false} onChange={handleOnChange} options={options} defaultValue={selectedOption} instanceId={useId()} className={`${className} my-react-select-container`}
+                classNamePrefix="my-react-select"/>
     )
 }
 

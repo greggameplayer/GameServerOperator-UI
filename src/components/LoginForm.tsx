@@ -5,33 +5,42 @@ import * as z from "zod";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Input, Card, CardBody, CardFooter, CardHeader, Button} from "@nextui-org/react";
+import {useEffect} from "react";
 
 export const LoginForm = () => {
-    const {formatMessage} = useIntl();
+    const {formatMessage, locale} = useIntl();
 
     const schema = z.object({
         email: z.string().nonempty({message: formatMessage({id: "login.errors.email.required"})}).email({message: formatMessage({id: "login.errors.email.format"})}),
         password: z.string().nonempty({message: formatMessage({id: "login.errors.password.required"})}).min(8, {message: formatMessage({id: "login.errors.password.min"})}),
     });
 
+    type LoginSchema = z.infer<typeof schema>;
+
     const {
         register,
         handleSubmit,
         formState: {errors, isValid},
-    } = useForm({
+        trigger
+    } = useForm<LoginSchema>({
         mode: "onTouched",
         resolver: zodResolver<any>(schema)
     });
 
-    const onSubmit = (data: any) => {
+    const onSubmit = (data: LoginSchema) => {
         console.log(data);
     }
 
+    // trigger errored fields on locale change
+    useEffect(() => {
+        trigger(Object.keys(errors) as Array<keyof ("email" | "password" | ("email" | "password")[] | readonly ("email" | "password")[] | undefined)>);
+    }, [errors, locale, trigger]);
+
     return (
-        <form className="w-11/12 md:w-7/12 lg:w-5/12 my-auto" onSubmit={handleSubmit(onSubmit)}>
+        <form className="w-11/12 md:w-7/12 lg:w-5/12 lg:mt-unit-2xl md:my-auto mt-unit-xl" onSubmit={handleSubmit(onSubmit)}>
             <Card className="py-4 px-3 flex flex-col">
                 <CardHeader className="flex flex-col items-center">
-                    <h2 className="font-bold text-4xl">{formatMessage({id: "login.title"})}</h2>
+                    <h2 className="font-bold text-3xl md:text-4xl">{formatMessage({id: "login.title"})}</h2>
                 </CardHeader>
                 <CardBody className="flex flex-col gap-4">
                     <Input

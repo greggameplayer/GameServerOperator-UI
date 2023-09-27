@@ -1,7 +1,7 @@
 "server-only";
 
 import { createIntl } from '@formatjs/intl';
-import { currentLocale } from 'next-i18n-router';
+import currentLocale from "@/components/currentLocale";
 
 const getMessages = async (lang: string) => {
     return (await import(`@/i18n/${lang}.json`)).default;
