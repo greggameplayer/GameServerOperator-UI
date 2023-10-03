@@ -1,15 +1,12 @@
 "use client";
 
-import { useIntl } from 'react-intl';
 import {LoginForm} from "@/components/LoginForm";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import Lottie from "lottie-react";
 import loginAnimation from "@/assets/loginAnimation.json";
 import {ThemeSwitcher} from "@/components/ThemeSwitcher";
 
-export default function Home() {
-    const { formatMessage } = useIntl();
-
+export default function Login() {
     return (
         <main className="flex flex-col min-h-screen items-center pb-1 sm:pb-0">
             <div className="flex flex-row self-end mt-3 gap-3 mr-3">

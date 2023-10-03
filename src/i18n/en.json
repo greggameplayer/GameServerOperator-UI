@@ -6,5 +6,8 @@
   "login.errors.email.format": "Invalid email",
   "login.errors.password.required": "The password is required",
   "login.errors.password.min": "The password must be at least 8 characters",
-  "login.submit": "Login"
+  "login.submit": "Login",
+  "login.errors.generic": "An error has occurred, please try again later",
+  "login.errors.notfound": "The email or password is incorrect",
+  "login.errors.unauthorized": "The email or password is incorrect"
 }

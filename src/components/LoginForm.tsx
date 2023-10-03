@@ -1,34 +1,53 @@
 "use client";
 
 import {useIntl} from "react-intl";
-import * as z from "zod";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Input, Card, CardBody, CardFooter, CardHeader, Button} from "@nextui-org/react";
 import {useEffect} from "react";
+import {loginSchema, LoginSchema} from "@/lib/types";
+import {getProviders, signIn} from "next-auth/react";
+import {useRouter} from "next/navigation";
+import toast from "react-hot-toast";
+import {useTheme} from "next-themes";
 
 export const LoginForm = () => {
+    const {theme} = useTheme();
+    const router = useRouter();
     const {formatMessage, locale} = useIntl();
-
-    const schema = z.object({
-        email: z.string().nonempty({message: formatMessage({id: "login.errors.email.required"})}).email({message: formatMessage({id: "login.errors.email.format"})}),
-        password: z.string().nonempty({message: formatMessage({id: "login.errors.password.required"})}).min(8, {message: formatMessage({id: "login.errors.password.min"})}),
-    });
-
-    type LoginSchema = z.infer<typeof schema>;
 
     const {
         register,
         handleSubmit,
-        formState: {errors, isValid},
+        formState: {errors, isValid, isSubmitting},
         trigger
     } = useForm<LoginSchema>({
         mode: "onTouched",
-        resolver: zodResolver<any>(schema)
+        resolver: zodResolver<any>(loginSchema({formatMessage}))
     });
 
-    const onSubmit = (data: LoginSchema) => {
-        console.log(data);
+    const onSubmit = async (data: LoginSchema) => {
+        const res = await signIn("credentials", {
+            email: data.email,
+            password: data.password,
+            redirect: false
+        })
+        if (res == undefined) toast.error(formatMessage({id: "login.errors.generic"}), {
+            style: {
+                backgroundColor: theme === "dark" ? "#333" : "#fff",
+                color: theme === "dark" ? "#fff" : "#333"
+            }
+        });
+        if (res!.error) toast.error(res!.error, {
+            style: {
+                backgroundColor: theme === "dark" ? "#333" : "#fff",
+                color: theme === "dark" ? "#fff" : "#333"
+            }
+        });
+        console.log(res);
+        if (res!.ok) {
+            router.push("/");
+        }
     }
 
     // trigger errored fields on locale change
@@ -37,7 +56,8 @@ export const LoginForm = () => {
     }, [errors, locale, trigger]);
 
     return (
-        <form className="w-11/12 md:w-7/12 lg:w-5/12 lg:mt-unit-2xl md:my-auto mt-unit-xl" onSubmit={handleSubmit(onSubmit)}>
+        <form className="w-11/12 md:w-7/12 lg:w-5/12 lg:mt-unit-2xl md:my-auto mt-unit-xl"
+              onSubmit={handleSubmit(onSubmit)}>
             <Card className="py-4 px-3 flex flex-col">
                 <CardHeader className="flex flex-col items-center">
                     <h2 className="font-bold text-3xl md:text-4xl">{formatMessage({id: "login.title"})}</h2>
@@ -62,7 +82,8 @@ export const LoginForm = () => {
                 </CardBody>
                 <CardFooter className="flex flex-col items-center px-5">
                     <Button type="submit" color="primary" variant="ghost" className="w-full"
-                            isDisabled={!isValid}>{formatMessage({id: "login.submit"})}</Button>
+                            isDisabled={!isValid || isSubmitting}
+                            isLoading={isSubmitting}>{isSubmitting ? "" : formatMessage({id: "login.submit"})}</Button>
                 </CardFooter>
             </Card>
         </form>

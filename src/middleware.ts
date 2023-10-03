@@ -2,8 +2,9 @@ import i18nConfig from '../i18nConfig';
 import {NextRequest, NextResponse} from "next/server";
 import Negotiator from "negotiator";
 import {match} from "@formatjs/intl-localematcher";
+import {getToken} from "next-auth/jwt";
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     // If you already have middleware that generates a response,
     // you can pass the response as a third argument for i18nRouter to use.
     const negotiatorHeaders: any = {};
@@ -22,6 +23,20 @@ export function middleware(request: NextRequest) {
         'x-next-i18n-router-locale',
         chosenLanguage
     );
+
+    // try to get user session from server using api route
+    const serverSession = await getToken({
+        req: request
+    });
+
+    const protectedRoutes = [
+        "/"
+        ];
+
+    if (protectedRoutes.includes(request.nextUrl.pathname) && !serverSession) {
+        return NextResponse.redirect(`${request.nextUrl.origin}/login`);
+    }
+
     return response;
 }
 

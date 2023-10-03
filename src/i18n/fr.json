@@ -6,5 +6,8 @@
   "login.errors.email.format": "L'email est invalide",
   "login.errors.password.required": "Le mot de passe est obligatoire",
   "login.errors.password.min": "Le mot de passe doit faire au minimum 8 caractères",
-  "login.submit": "Se connecter"
+  "login.submit": "Se connecter",
+  "login.errors.generic": "Une erreur est survenue, veuillez réessayer plus tard",
+  "login.errors.notfound": "L'email ou le mot de passe est incorrect",
+  "login.errors.unauthorized": "L'email ou le mot de passe est incorrect"
 }

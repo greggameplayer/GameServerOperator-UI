@@ -9,3 +9,91 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum AuthenticationType {
+  BASIC
+  OAUTH2
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id               String       @id @default(cuid())
+  name             String?
+  email            String?      @unique
+  emailVerified    DateTime?
+  password         String?
+  image            String?
+  accounts         Account[]
+  sessions         Session[]
+  permissions      Permission[]
+  twoFactorEnabled Boolean      @default(false)
+  twoFactorSecret  String?
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum PermissionType {
+  ALL
+  CREATE
+  READ
+  UPDATE
+  DELETE
+}
+
+enum PermissionGroup {
+  ADMIN
+  GAME
+}
+
+model Game {
+  id          Int          @id @default(autoincrement())
+  name        String
+  permissions Permission[]
+}
+
+model Permission {
+  name       String           @id
+  type       PermissionType[]
+  group      PermissionGroup
+  game       Game?            @relation(fields: [gameId], references: [id])
+  gameId     Int?
+  users      User[]
+  userGroups Group[]
+}
+
+model Group {
+  name        String       @id
+  permissions Permission[]
+}

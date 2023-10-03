@@ -3,6 +3,7 @@ import {Inter} from 'next/font/google'
 import {ClientProviders} from "@/app/clientProviders";
 import {ServerProviders} from "@/app/serverProviders";
 import {Metadata} from "next";
+import {Toaster} from "react-hot-toast";
 
 const inter = Inter({subsets: ['latin']});
 
@@ -17,6 +18,7 @@ export default function RootLayout({children}: { children: React.ReactNode }) {
         <body>
         <ServerProviders>
             <ClientProviders>
+                <Toaster position="top-right"/>
                 {children}
             </ClientProviders>
         </ServerProviders>

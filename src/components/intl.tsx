@@ -1,17 +1,35 @@
 "server-only";
 
-import { createIntl } from '@formatjs/intl';
+import { createIntl, createIntlCache } from '@formatjs/intl';
 import currentLocale from "@/components/currentLocale";
+import fr from "@/i18n/fr.json";
+import en from "@/i18n/en.json";
 
-const getMessages = async (lang: string) => {
-    return (await import(`@/i18n/${lang}.json`)).default;
+const messages = new Map([
+    ["fr", fr],
+    ["en", en]
+]);
+
+const getMessages = (lang: string) => {
+    return messages.get(lang);
 };
 
-export default async function getIntl() {
+export default function getIntl() {
     const lang: string = currentLocale()!;
+
+    const cache = createIntlCache();
 
     return createIntl({
         locale: lang,
-        messages: await getMessages(lang)
-    });
+        messages: getMessages(lang)
+    }, cache);
+}
+
+export function getIntlWithLocale(locale: string) {
+    const cache = createIntlCache();
+
+    return createIntl({
+        locale: locale,
+        messages: getMessages(locale)
+    }, cache);
 }
