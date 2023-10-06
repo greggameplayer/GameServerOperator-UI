@@ -54,6 +54,8 @@ model User {
   permissions      Permission[]
   twoFactorEnabled Boolean      @default(false)
   twoFactorSecret  String?
+  Group            Group?       @relation(fields: [groupName], references: [name])
+  groupName        String?
 }
 
 model VerificationToken {
@@ -95,5 +97,6 @@ model Permission {
 
 model Group {
   name        String       @id
+  users       User[]
   permissions Permission[]
 }

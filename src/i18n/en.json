@@ -9,5 +9,9 @@
   "login.submit": "Login",
   "login.errors.generic": "An error has occurred, please try again later",
   "login.errors.notfound": "The email or password is incorrect",
-  "login.errors.unauthorized": "The email or password is incorrect"
+  "login.errors.unauthorized": "The email or password is incorrect",
+  "login.errors.twofactor": "The two factor code is incorrect",
+  "twofactor.title": "Two factor authentication",
+  "twofactor.labels.close": "Close",
+  "twofactor.labels.validate": "Validate"
 }

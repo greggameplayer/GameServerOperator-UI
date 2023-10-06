@@ -4,50 +4,89 @@ import {useIntl} from "react-intl";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
 import {Input, Card, CardBody, CardFooter, CardHeader, Button} from "@nextui-org/react";
-import {useEffect} from "react";
-import {loginSchema, LoginSchema} from "@/lib/types";
-import {getProviders, signIn} from "next-auth/react";
+import {useEffect, useState} from "react";
+import {loginSchema, LoginSchema, LoginSchemaWithTotp} from "@/lib/types";
+import {signIn} from "next-auth/react";
 import {useRouter} from "next/navigation";
 import toast from "react-hot-toast";
 import {useTheme} from "next-themes";
+import {ErrorCode} from "@/utils/ErrorCode";
+import TwoFactorModal from "@/components/TwoFactorModal";
 
 export const LoginForm = () => {
     const {theme} = useTheme();
     const router = useRouter();
     const {formatMessage, locale} = useIntl();
+    const [showOTP, setShowOTP] = useState<boolean>(false);
 
     const {
         register,
         handleSubmit,
         formState: {errors, isValid, isSubmitting},
-        trigger
+        trigger,
+        getValues
     } = useForm<LoginSchema>({
         mode: "onTouched",
         resolver: zodResolver<any>(loginSchema({formatMessage}))
     });
 
-    const onSubmit = async (data: LoginSchema) => {
+    const emitI18nErrorToast = (id: string) => {
+        toast.error(formatMessage({id: id}), {
+            style: {
+                backgroundColor: theme === "dark" ? "#333" : "#fff",
+                color: theme === "dark" ? "#fff" : "#333"
+            }
+        });
+    }
+
+    const signInWithErrorsHandled = async (data: LoginSchemaWithTotp) => {
         const res = await signIn("credentials", {
             email: data.email,
             password: data.password,
             redirect: false
-        })
-        if (res == undefined) toast.error(formatMessage({id: "login.errors.generic"}), {
-            style: {
-                backgroundColor: theme === "dark" ? "#333" : "#fff",
-                color: theme === "dark" ? "#fff" : "#333"
-            }
         });
-        if (res!.error) toast.error(res!.error, {
-            style: {
-                backgroundColor: theme === "dark" ? "#333" : "#fff",
-                color: theme === "dark" ? "#fff" : "#333"
-            }
-        });
-        console.log(res);
-        if (res!.ok) {
+
+        if (res === undefined) {
+            emitI18nErrorToast("login.errors.generic");
+            return false;
+        }
+
+        switch (res?.error) {
+            case ErrorCode.SecondFactorRequired:
+                setShowOTP(true);
+                return false;
+            case ErrorCode.UserNotFound:
+                emitI18nErrorToast("login.errors.notfound");
+                return false;
+            case ErrorCode.IncorrectPassword:
+                emitI18nErrorToast("login.errors.unauthorized");
+                return false;
+            case ErrorCode.IncorrectTwoFactorCode:
+                emitI18nErrorToast("login.errors.twofactor");
+                return false;
+            case ErrorCode.InternalServerError:
+                emitI18nErrorToast("login.errors.generic");
+                return false;
+        }
+
+        if (res?.ok) {
             router.push("/");
         }
+    }
+
+    const onSubmit = async (data: LoginSchema) => {
+        await signInWithErrorsHandled({...data, totpCode: ""});
+    }
+
+    const onTwoFactorSubmit = async (value: string) => {
+        const res = await signInWithErrorsHandled({...getValues(), totpCode: value});
+        if (!res) {
+            setShowOTP(false);
+        }
+    }
+
+    const onTwoFactorClose = () => {
+        setShowOTP(false);
     }
 
     // trigger errored fields on locale change
@@ -69,6 +108,7 @@ export const LoginForm = () => {
                         variant="bordered"
                         errorMessage={errors.email && <>{errors.email.message}</>}
                         isInvalid={Boolean(errors.email)}
+                        disabled={showOTP}
                         {...register("email")}
                     />
                     <Input
@@ -77,15 +117,19 @@ export const LoginForm = () => {
                         variant="bordered"
                         errorMessage={errors.password && <>{errors.password.message}</>}
                         isInvalid={Boolean(errors.password)}
+                        disabled={showOTP}
                         {...register("password")}
                     />
                 </CardBody>
                 <CardFooter className="flex flex-col items-center px-5">
                     <Button type="submit" color="primary" variant="ghost" className="w-full"
-                            isDisabled={!isValid || isSubmitting}
+                            isDisabled={!isValid || isSubmitting || showOTP}
                             isLoading={isSubmitting}>{isSubmitting ? "" : formatMessage({id: "login.submit"})}</Button>
                 </CardFooter>
             </Card>
+            {showOTP && (
+                <TwoFactorModal onChange={onTwoFactorSubmit} onClose={onTwoFactorClose} />
+            )}
         </form>
     )
 }

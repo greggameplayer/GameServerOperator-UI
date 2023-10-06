@@ -8,3 +8,5 @@ export const loginSchema = ({formatMessage} : {formatMessage: any }) => z.object
 
 // unwrap from arrow function
 export type LoginSchema = { email: string; password: string };
+
+export type LoginSchemaWithTotp = LoginSchema & { totpCode: string };
